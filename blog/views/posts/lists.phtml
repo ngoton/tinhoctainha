@@ -1,0 +1,590 @@
+<?php
+$url_order = 'ASC';
+if ($order_by == 'posts_id')
+    $url_order = $order == 'ASC' ? 'DESC' : 'ASC';
+elseif ($order_by == 'posts_title')
+    $url_order = $order == 'ASC' ? 'DESC' : 'ASC';
+elseif ($order_by == 'posts_date')
+    $url_order = $order == 'ASC' ? 'DESC' : 'ASC';
+elseif ($order_by == 'posts_link')
+    $url_order = $order == 'ASC' ? 'DESC' : 'ASC';
+elseif ($order_by == 'posts_view')
+    $url_order = $order == 'ASC' ? 'DESC' : 'ASC';
+
+    $i = $sonews*$page-($sonews-1);
+
+?>
+<script type="text/javascript" src="<?php echo BASE_URL ?>/js/edit/editor/ckeditor.js"></script>
+
+<link rel="stylesheet" type="text/css" href="<?php echo BASE_URL ?>/css/edit/jquery.multiselect.css" />
+<script type="text/javascript" src="<?php echo BASE_URL ?>/js/edit/jquery.multiselect.js"></script>
+<link href="<?php echo BASE_URL ?>/css/edit/jquery.tagit.css" rel="stylesheet" type="text/css">
+<link href="<?php echo BASE_URL ?>/css/edit/tagit.ui-zendesk.css" rel="stylesheet" type="text/css">
+<script src="<?php echo BASE_URL ?>/js/edit/tag-it.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript">
+$(function(){
+    $("#posts_categories").multiselect();
+});
+</script>
+
+<div id="loading"></div>
+<div id="winpopup"></div>
+
+<div id="content" style="padding:5px;">
+    <center style="clear:both;margin-bottom: -30px;"><h1> BÀI VIẾT</h1></center>
+<div class="add-box">
+    <a class="add_button" onClick="add_click();">Thêm bài mới</a>
+    
+</div>
+    <div class="search-box">
+        
+        <input type="search" id="search-input" name="s" value="<?php echo isset($keyword)?$keyword:null; ?>" placeholder="Search">
+        <input type="button" name="" id="search-submit" class="button-search" value="Search" onclick="searchall('<?php echo $page ?>','<?php echo $order_by ?>','<?php echo $order ?>');">
+       
+    </div>
+    
+    <div class="tablenav top">
+
+        <div class="alignleft actions">
+            <select name="action" id="action">
+                <option value="-1" selected="selected">Select</option>
+                
+                <option value="delete">Delete</option>
+            </select>
+            <input type="button" name="" id="doaction" class="button action" value="Apply" onclick="action();">
+        </div>
+        <div class="alignleft actions">
+        <select name="m" id="chonloc">
+            <option  value="18446744073709">All</option>
+            <option value="15">15 items</option>
+            <option value="20">20 items</option>
+            <option value="50">50 items</option>
+            <option selected="selected" value="100">100 items</option>
+        </select>
+        <input type="button" name="" id="post-query-submit" class="button" value="Apply" onclick="searchall('<?php echo $page ?>','<?php echo $order_by ?>','<?php echo $order ?>');">                              
+        </div>
+
+        
+      </div>
+
+</div>
+
+<div>
+
+    <table class="table_data" id="tblExport">
+    <thead>
+        <tr>
+            <th class="fix"><input type="checkbox" onclick="checkall('checkbox', this)" name="checkall"/></th>
+            <th  class="fix" >
+                <a class="sort <?php echo $order ?>" onclick="sapxep('<?php echo $page ?>','posts_id','<?php echo $url_order ?>')">STT <?php if ($order_by == 'posts_id'): ?><i class="icon-chevron-<?php echo $url_order == 'ASC' ? 'down' : 'up' ?>"></i><?php endif; ?></a>
+            </th>
+            <th  class="fix" >
+                <a class="sort <?php echo $order ?>" onclick="sapxep('<?php echo $page ?>','posts_date','<?php echo $url_order ?>')">Ngày đăng <?php if ($order_by == 'posts_date'): ?><i class="icon-chevron-<?php echo $url_order == 'ASC' ? 'down' : 'up' ?>"></i><?php endif; ?></a>
+            </th>
+            <th  class="fix">
+                <a class="sort <?php echo $order ?>" onclick="sapxep('<?php echo $page ?>','posts_title','<?php echo $url_order ?>')">Tiêu đề <?php if ($order_by == 'posts_title'): ?><i class="icon-chevron-<?php echo $url_order == 'ASC' ? 'down' : 'up' ?>"></i><?php endif; ?></a>
+            </th>
+            <th  class="fix">
+                <a class="sort <?php echo $order ?>" onclick="sapxep('<?php echo $page ?>','posts_link','<?php echo $url_order ?>')">Đường dẫn <?php if ($order_by == 'posts_link'): ?><i class="icon-chevron-<?php echo $url_order == 'ASC' ? 'down' : 'up' ?>"></i><?php endif; ?></a>
+            </th>
+            <th  class="fix">
+                <a class="sort <?php echo $order ?>" onclick="sapxep('<?php echo $page ?>','posts_view','<?php echo $url_order ?>')">Lượt view <?php if ($order_by == 'posts_view'): ?><i class="icon-chevron-<?php echo $url_order == 'ASC' ? 'down' : 'up' ?>"></i><?php endif; ?></a>
+            </th>
+            <th class="fix"></th>
+        </tr>
+        
+       </thead>
+       <tbody>
+        <?php foreach ($posts as $post) : ?>
+
+            <tr onClick="HighLightTR(this,'#4d90fe','cc3333');" id="<?php echo $post->posts_id ?>" class="edit_tr">
+                
+                <td>
+                    <input name="check[]" type="checkbox" class="checkbox" value="<?php echo $post->posts_id ?>">
+                </td>
+                
+                <td  class="fix"><?php echo $i++; ?></td>
+                <td class="fix" id="posts_date_<?php echo $post->posts_id; ?>"><?php echo $lib->hien_thi_ngay_thang($post->posts_date); ?></td>
+                <td class="fix" id="posts_title_<?php echo $post->posts_id; ?>"><?php echo $post->posts_title; ?></td>
+                <td class="fix" id="posts_link_<?php echo $post->posts_id; ?>"><?php echo $post->posts_link; ?></td>
+                <td class="fix" id="posts_view_<?php echo $post->posts_id; ?>"><?php echo $post->posts_view; ?></td>
+                <td class="fix" style="display:none" id="posts_desc_<?php echo $post->posts_id; ?>"><?php echo $post->posts_desc; ?></td>
+                <td class="fix" style="display:none" id="posts_content_<?php echo $post->posts_id; ?>"><?php echo $post->posts_content; ?></td>
+                <td class="fix" style="display:none" id="posts_categories_<?php echo $post->posts_id; ?>"><?php echo $post->posts_categories; ?></td>
+                <td class="fix" style="display:none" id="posts_tags_<?php echo $post->posts_id; ?>">
+                    <?php 
+                    if($post->posts_tags != ""){
+                        $tags = explode(',', $post->posts_tags);
+                        foreach ($tags as $key) {
+                            echo ','.$tag_data['name'][$key];
+                        }
+                    }
+                    ?>
+                </td>
+                
+                <td>
+                    <button class="error" onclick="del(<?php echo $post->posts_id ?>)" >Xóa</button>
+                    
+                   
+                </td>
+            </tr>
+
+
+        <?php endforeach; ?>
+         
+       </tbody>
+    </table>
+        <?php
+        $this->helper('slidePaginator');
+        ?>
+    </div>
+
+<div style="display:none" id="lasted"></div>
+<div id="error" class="error"><?php echo isset($error) ? $error : null; ?></div>
+
+<div class="add-field">
+        <fieldset class="groupbox">
+            <legend>
+                <span><h3>Bài viết </h3></span>
+            </legend>
+            <div class="login_body">
+                  <form id="add_tire" method="post" action="<?php echo BASE_URL ?>/posts/add" enctype="multipart/form-data">
+                      <table style="margin-top:0px;width:100%">
+                        <tr>
+                            
+                            <td>Tiêu đề</td>
+                            <td>
+                                <input style="width:100%"  type="text" id="posts_title"  name="posts_title" tabindex="1"  required="required" >
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Đường dẫn</td>
+                            <td>
+                                <input style="width:100%" type="text" id="posts_link"  name="posts_link" tabindex="2"  required="required" >
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Chuyên mục</td>
+                            <td >
+                                <select multiple="multiple" name="posts_categories" id="posts_categories" tabindex="3" required="required">
+                                    <?php $ty=0; ?>
+                                    <?php foreach ($categories as $categorie) { ?>
+
+                                        <option value="<?php echo $categorie->categories_id ?>"><?php echo $categorie->categories_name ?></option>
+                                    <?php } ?>
+                                    </optgroup>
+                                </select>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            
+                        </tr>
+                        <tr>
+                            <td>Mô tả </td>
+                            <td><textarea id="posts_desc" name="posts_desc" tabindex="4" ></textarea></td>
+                        </tr>
+                        <tr>
+                            <td>Nội dung </td>
+                            <td ><textarea id="posts_content" name="posts_content" tabindex="5"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td>Tags </td>
+                            <td>
+                                <input type="text" id="posts_tags"  name="posts_tags" tabindex="6"  >
+                                <ul id="mytags"></ul>
+
+                            </td>
+                        </tr>
+                        
+                                               
+                        
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td><input type="hidden" readonly id="yes" name="yes" required="required" ></td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        
+                        
+                         <tr>
+
+                            <td>
+                                
+                                
+                            </td>
+                            <td>
+                                <input type="submit" name="submit" value="Submit" tabindex="7">
+                                <input type="reset" name="reset" value="Reset" tabindex="8">
+                            </td>
+                             
+                        </tr>
+                    </table> 
+                </form>
+            </div>
+        </fieldset>
+    </div>
+
+
+<script type="text/javascript">
+
+
+  
+$( ".add-field" ).dialog({
+    autoOpen: false,
+    modal: true,
+    width: "auto",
+    title: "Bài viết",
+    hide: 'fold',
+    show: 'blind'
+});
+
+
+$('html').click(function(e) {
+    if(e.target == '[object HTMLBodyElement]') {
+        $('.add-field').slideUp(500);   
+         
+    }
+    
+    
+});
+
+
+
+    $('.edit_tr').click(function(e){
+        if(e.target != '[object HTMLButtonElement]' && e.target != '[object HTMLSpanElement]' && !$('.checkbox').is(':focus')) { 
+            if(!$('.checkbox').is(':focus')){
+                $("html, body").animate({ scrollTop: $('.add-field').offset().top }, 300);
+            }
+            
+            var posts_title = $(this).find("#posts_title_"+$(this).attr('id')).text();
+            var posts_desc = $(this).find("#posts_desc_"+$(this).attr('id')).text();
+            var posts_content = $(this).find("#posts_content_"+$(this).attr('id')).text();
+            var posts_categories = $(this).find("#posts_categories_"+$(this).attr('id')).text();
+            var posts_tags = $(this).find("#posts_tags_"+$(this).attr('id')).text();
+            var posts_link = $(this).find("#posts_link_"+$(this).attr('id')).text();
+
+            
+            $('#yes').val($(this).attr('id'));
+            
+            $('#posts_title').val(posts_title);
+            $('#posts_desc').val(posts_desc);
+            $('#posts_content').val(posts_content);
+            $('#posts_link').val(posts_link);
+
+            var myarr = posts_categories.split(",");
+
+            var key;
+            for (key in myarr) {
+                $("#posts_categories option[value=" + myarr[key] + "]").attr('selected', 'selected');
+                $("input[name='multiselect_posts_categories'][value=" + myarr[key] + "]").prop('checked', true);
+            }
+            
+            $('#posts_tags').val(posts_tags.trim().substring(1));
+            $("#posts_tags").tagit({
+              tagSource: function(search, showChoices) {
+                $.ajax({
+                  url: "<?php echo BASE_URL ?>/posts/getTag",
+                  data: {search: search.term},
+                  success: function(choices) {
+                    showChoices(choices);
+                  }
+                });
+              }
+            });
+
+
+            CKEDITOR.instances['posts_content'].setData(posts_content);
+            CKEDITOR.instances['posts_desc'].setData(posts_desc);
+           
+            $( ".add-field" ).dialog( "open" );
+        }
+
+        
+        
+    });
+
+
+</script>
+<script type="text/javascript">
+
+function add_click(){
+    $('#yes').val("");
+    $('.add-field').slideDown(500);
+     $("html, body").animate({ scrollTop: $('.add-field').offset().top }, 300);   
+     
+        $('#posts_title').val("");
+        $('#posts_desc').val("");
+        $('#posts_content').val("");
+        $('#posts_link').val("");
+        $('#posts_categories').val("");
+        $('#posts_tags').val("");
+
+        $("#posts_tags").tagit({
+              tagSource: function(search, showChoices) {
+                $.ajax({
+                  url: "<?php echo BASE_URL ?>/posts/getTag",
+                  data: {search: search.term},
+                  success: function(choices) {
+                    showChoices(choices);
+                  }
+                });
+              }
+            });
+                
+        $('.numbers').focus(function(){
+            if ( $(this).val() == '0') {
+               $(this).val(""); 
+            };
+            
+        });
+        $('.numbers').blur(function(){
+            if ( $(this).val() == "") {
+                $(this).val(0);
+            };
+            
+        });
+
+    $( ".add-field" ).dialog( "open" );
+}
+
+
+$(document).ready(function(){
+            
+
+
+    $("#add_tire").validate({
+                errorElement: "span", // Định dạng cho thẻ HTML hiện thông báo lỗi
+                rules: {
+                    
+                },
+                submitHandler: function(form) {
+                    for ( instance in CKEDITOR.instances ){
+                        CKEDITOR.instances['posts_content'].updateElement();
+                        CKEDITOR.instances['posts_desc'].updateElement();
+                    }
+
+                    var formData = new FormData($("#add_tire")[0]);
+
+                    var posts_title = $('#posts_title').attr('value');
+                    var posts_desc = $('#posts_desc').attr('value');
+                    var posts_content = $('#posts_content').attr('value');
+                    var posts_link = $('#posts_link').val();
+                    var posts_categories = $('#posts_categories').attr('value');
+
+                    if (posts_categories == "") {
+                        $('#posts_categories').focus();
+                        return false;
+                    }
+                    var posts_tags = $('#posts_tags').val().trim();
+                    
+                    var yes = $('#yes').attr('value');
+                    
+                    var action      = "them";
+                 
+                    $.ajax({
+                        type: "POST", // phương thức gởi đi
+                        url: "<?php echo BASE_URL ?>/posts/add", // nơi mà dữ liệu sẽ chuyển đến khi submit
+                        enctype: 'multipart/form-data',
+                        processData: false,
+                        contentType: false,
+                        data: formData, // giá trị post
+                        success: function(answer){ // if everything goes well
+                            //alert(answer);
+                            $('#error').hide();
+                            $('#error').slideToggle(100); // hiển thị thẻ div success
+                            $('#error').html('<div class="successbox">'+answer+'</div>'); // đặt kết quả trả về từ test.php vào thẻ div success
+                            $('#error').fadeOut(10000);
+
+                            if (yes != "") {
+                                setTimeout(function() {
+                                        sapxep('<?php echo $page ?>','<?php echo $order_by ?>','<?php echo $order ?>');
+                                      }, 200);
+
+                            }
+                            else{
+                                setTimeout(function() {
+                                        sapxep('<?php echo $page ?>','<?php echo $order_by ?>','<?php echo $order ?>');
+                                      }, 200);
+
+                                
+                            }
+                        }
+                    });
+                    return false;
+                     
+                 }
+            });
+
+
+   $('.numbers').keyup(function(event) {
+
+          // skip for arrow keys
+      if(event.which >= 37 && event.which <= 40) return;
+
+      // format number
+      $(this).val(function(index, value) {
+        return value
+          .replace(/[^0-9-.]/g, "")
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        ;
+      });
+    });
+
+    $('.number').keyup(function(event) {
+
+          // skip for arrow keys
+      if(event.which >= 37 && event.which <= 40) return;
+
+      // format number
+      $(this).val(function(index, value) {
+        return value
+          .replace(/[^0-9-]/g, "")
+        ;
+      });
+    });
+    
+
+});
+
+function get_number(id){
+    return $(id).val().replace(/\,/g,'');
+}
+function set_item(item,name) {
+    // change input value
+    $('#work_code').val(item);
+    $("#work_code").attr("data",name);
+    
+    $('#code_list_id').hide();
+    $('#work_code').focus();
+}
+
+function set_item_tire(item,name) {
+    // change input value
+    $('.tire_pattern').val(item);
+    $(".tire_pattern").attr("data",name);
+    
+    $('.tire_list_id').hide();
+    $('.tire_pattern').focus();
+}
+
+</script>
+<div style="display:none" id="lasted"></div>
+<script type="text/javascript">
+    var count = parseInt(<?php echo $lastID ?>);
+    $('#lasted').html(count);
+
+$("#import_excel").click(function(){
+        $("#winpopup").dialog({
+            draggable:true,
+            modal: true,
+            autoOpen: false,
+            height:300,
+            width:400,
+            resizable: false,
+            title:'Import Excel',
+            
+        });
+        $("#winpopup").load($(this).attr('href'));
+        $("#winpopup").dialog("open");
+         
+        return false;
+    });
+
+
+ 
+var x = "<?php echo $limit ?>";
+$('#chonloc option[value='+x+']').attr('selected','selected');
+
+
+</script>
+</div>
+
+<script type="text/javascript">
+
+
+
+$(".show").click(function(){
+    $("#winpopup").dialog({
+        draggable:true,
+        modal: true,
+        autoOpen: false,
+        width: "90%",
+        resizable: false,
+        position: "top",
+        title:'Chi tiết',
+        buttons: {
+            OK: function() {
+                $( this ).dialog( "close" );
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    });
+    $("#winpopup").load($(this).attr('href'));
+    $("#winpopup").dialog("open");
+    return false;
+});
+
+
+
+  CKEDITOR.replace('posts_content');
+  CKEDITOR.replace('posts_desc');
+
+</script>
+
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+    jQuery('.tabs .tab-links a').on('click', function(e)  {
+        var currentAttrValue = jQuery(this).attr('href');
+        // Show/Hide Tabs
+        jQuery('.tabs ' + currentAttrValue).slideDown(300).siblings().slideUp(300);
+ 
+        // Change/remove current tab to active
+        jQuery(this).parent('li').addClass('active').siblings().removeClass('active');
+ 
+        e.preventDefault();
+    });
+
+    jQuery('.tabs .tab-left a').on('click', function(e)  {
+        var currentAttrValue = jQuery(this).attr('href');
+ 
+        // Show/Hide Tabs
+        jQuery('.tabs ' + currentAttrValue).slideDown(300).siblings().slideUp(300);
+ 
+        // Change/remove current tab to active
+        jQuery(this).parent('li').addClass('active').siblings().removeClass('active');
+ 
+        e.preventDefault();
+    });
+});
+
+
+
+function remove_unicode(str) 
+{  
+      str= str.toLowerCase();  
+      str= str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a");  
+      str= str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e");  
+      str= str.replace(/ì|í|ị|ỉ|ĩ/g,"i");  
+      str= str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o");  
+      str= str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u");  
+      str= str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y");  
+      str= str.replace(/đ/g,"d");  
+      str= str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'| |\"|\&|\#|\[|\]|~|$|_/g,"-"); 
+    
+      str= str.replace(/-+-/g,"-"); //thay thế 2- thành 1- 
+      str= str.replace(/^\-+|\-+$/g,"");  
+    
+      return str;  
+} 
+
+$('#posts_title').keyup(function(){
+    var str = $(this).val();
+    var link = remove_unicode(str);
+    $('#posts_link').val(link);
+});
+
+</script>
